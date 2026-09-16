@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { DataIndex, MatrixStatus, Need, ProtoState, Requirement } from "./model";
 import { MATRIX_STATUS_LABEL, NEED_STATUS_LABEL, PROTO_LABEL } from "./model";
 import { nextSort, sortRows, type Sort } from "./sort";
@@ -36,8 +37,13 @@ function needKey(n: Need, key: string): string | number {
 }
 
 /** The module matrix, one need per row — the same columns and order as the matrix everyone has seen. */
-export function NeedsTable({ rows, openId, onOpen, sort, onSort }: TableProps<Need>) {
+export function NeedsTable({ rows, openId, onOpen, sort, onSort, index }: TableProps<Need> & { index: DataIndex }) {
+  const [tip, setTip] = useState<Tip>(null);
+  const show = (id: string) => (e: React.SyntheticEvent<HTMLElement>) => setTip({ id, rect: e.currentTarget.getBoundingClientRect() });
+  const hide = () => setTip(null);
   return (
+    <>
+    {tip ? <ReqTip id={tip.id} rect={tip.rect} index={index} /> : null}
     <table className="matrix">
       <thead><tr>{NEED_COLUMNS.map(([key, label]) => <Th key={key} col={key} label={label} sort={sort} onSort={onSort} />)}</tr></thead>
       <tbody>
@@ -45,7 +51,11 @@ export function NeedsTable({ rows, openId, onOpen, sort, onSort }: TableProps<Ne
           <tr key={n.id} className={openId === n.id ? "open" : ""} onClick={() => onOpen(n.id)} tabIndex={0} onKeyDown={(e) => e.key === "Enter" && onOpen(n.id)}>
             <td className="goal"><span className="nid">{n.id}</span>{n.need}</td>
             <td className="by"><b>{n.raised_by}</b>{n.raised_where}</td>
-            <td className="ids">{n.requirements.length ? n.requirements.map((id) => <code key={id}>{id}</code>) : <span className="muted">—</span>}</td>
+            <td className="ids">
+              {n.requirements.length
+                ? n.requirements.map((id) => <code key={id} tabIndex={0} onMouseEnter={show(id)} onFocus={show(id)} onMouseLeave={hide} onBlur={hide}>{id}</code>)
+                : <span className="muted">—</span>}
+            </td>
             <td className="req">{n.requirement_text || <span className="muted">—</span>}</td>
             <td className="by">{n.requirement_by}</td>
             <td className="sol">{n.solution}</td>
@@ -61,6 +71,27 @@ export function NeedsTable({ rows, openId, onOpen, sort, onSort }: TableProps<Ne
         ))}
       </tbody>
     </table>
+    </>
+  );
+}
+
+type Tip = { id: string; rect: DOMRect } | null;
+const TIP_WIDTH = 420;
+const TIP_GAP = 6;
+
+/** The requirement behind an ID, shown while a code chip is hovered or focused — what the matrix also did. */
+function ReqTip({ id, rect, index }: { id: string; rect: DOMRect; index: DataIndex }) {
+  const req = index.requirements.find((r) => r.id === id);
+  const left = Math.max(8, Math.min(rect.left, window.innerWidth - TIP_WIDTH - 8));
+  const below = rect.bottom < window.innerHeight * 0.7;
+  const style = below ? { left, top: rect.bottom + TIP_GAP } : { left, bottom: window.innerHeight - rect.top + TIP_GAP };
+  return (
+    <div className="tip" role="tooltip" style={{ ...style, width: TIP_WIDTH }}>
+      <p className="tip-head"><b>{id}</b>{req ? <span className={`badge r-${(req.status || "unstatused").toLowerCase()}`}>{req.status || "unstatused"}</span> : null}</p>
+      {req ? <p>{req.ears || <span className="muted">no text imported</span>}</p> : <p className="muted">Not in the requirement set — the ID is cited but no file exists for it.</p>}
+      {req?.sheet_note ? <p className="muted">{req.sheet_note}</p> : null}
+      {req?.source ? <p className="tip-src">{req.source}</p> : null}
+    </div>
   );
 }
 

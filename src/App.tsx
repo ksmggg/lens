@@ -98,7 +98,7 @@ function Workspace({ index, viewer }: { index: DataIndex; viewer: Viewer }) {
         <Chips label="Person" values={peopleOf(index)} value={filters.person} onPick={(person) => setFilters({ ...filters, person })} />
       </div>
       <div className="tablewrap">
-        {lens === "needs" ? <NeedsTable rows={needs} openId={openId} onOpen={open} sort={sort} onSort={setSort} /> : <RequirementsTable rows={reqs} openId={openId} onOpen={open} sort={sort} onSort={setSort} index={index} />}
+        {lens === "needs" ? <NeedsTable rows={needs} openId={openId} onOpen={open} sort={sort} onSort={setSort} index={index} /> : <RequirementsTable rows={reqs} openId={openId} onOpen={open} sort={sort} onSort={setSort} index={index} />}
         {(lens === "needs" ? needs : reqs).length === 0 ? <p className="empty">Nothing matches. Clear a filter.</p> : null}
       </div>
       <aside className="pane" aria-live="polite">

@@ -72,7 +72,15 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .matrix td.status { white-space: nowrap; }
 .matrix td.proto { min-width: 15rem; font-size: .8rem; }
 .matrix td.proto p { margin: .25rem 0 0; color: var(--muted); }
+.matrix td.ids code:hover, .matrix td.ids code:focus-visible { background: var(--ink); color: var(--paper); outline: none; cursor: help; }
 .needref { display: block; margin-bottom: .25rem; }
+
+/* requirement behind an ID, while its chip is hovered or focused */
+.tip { position: fixed; z-index: 6; max-width: calc(100vw - 16px); padding: .7rem .85rem; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; box-shadow: 0 6px 24px rgba(0, 0, 0, .18); font-size: .82rem; line-height: 1.45; color: var(--ink); pointer-events: none; }
+.tip p { margin: 0 0 .4rem; }
+.tip p:last-child { margin-bottom: 0; }
+.tip-head { display: flex; align-items: center; gap: .5rem; font-family: var(--mono); font-size: .72rem; }
+.tip-src { font-family: var(--mono); font-size: .66rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding-top: .4rem; border-top: 1px solid var(--rule); }
 .empty { padding: 2rem; text-align: center; color: var(--muted); }
 
 .pane { display: none; }
