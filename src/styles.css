@@ -49,7 +49,6 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 /* the matrix: one need per row, every column the team reviews, scrolls sideways when the screen is narrower */
 .tablewrap { flex: 1; overflow-x: auto; padding-bottom: 5rem; }
 .matrix { border-collapse: collapse; width: 100%; min-width: 92rem; font-size: .84rem; }
-.matrix.reqs { min-width: 64rem; }
 .matrix thead th { position: sticky; top: 0; z-index: 2; background: var(--surface-2); padding: 0; border-bottom: 1px solid var(--rule); text-align: left; white-space: nowrap; }
 .sorter { display: block; width: 100%; text-align: left; border: 0; background: none; padding: .6rem .75rem; font-family: var(--mono); font-size: .66rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); cursor: pointer; }
 .sorter:hover, th[aria-sort=ascending] .sorter, th[aria-sort=descending] .sorter { color: var(--ink); }
@@ -61,10 +60,13 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .matrix tbody tr:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .matrix td.goal { min-width: 18rem; color: var(--ink); font-weight: 500; }
 .matrix td.goal .nid { display: block; font-family: var(--mono); font-size: .66rem; font-weight: 400; color: var(--muted); margin-bottom: .15rem; }
-.matrix td.by { min-width: 11rem; font-family: var(--mono); font-size: .72rem; color: var(--muted); }
+.matrix td.req p, .matrix td.reqby p { margin: .25rem 0 0; }
+.matrix td.reqby p { color: var(--muted); }
+.matrix .blk + .blk { margin-top: .5rem; padding-top: .5rem; border-top: 1px dashed var(--rule); }
+.matrix td.by, .matrix td.reqby { min-width: 11rem; font-family: var(--mono); font-size: .72rem; color: var(--muted); }
 .matrix td.by b { display: block; color: var(--ink-soft); font-weight: 500; }
 .matrix td.ids { min-width: 9rem; max-width: 12rem; }
-.matrix td.ids code, .needref code { display: inline-block; margin: 0 .25rem .25rem 0; font-family: var(--mono); font-size: .7rem; color: var(--ink); background: var(--surface-2); padding: .1rem .4rem; border-radius: 3px; white-space: nowrap; }
+.matrix code { display: inline-block; margin: 0 .25rem .25rem 0; font-family: var(--mono); font-size: .7rem; color: var(--ink); background: var(--surface-2); padding: .1rem .4rem; border-radius: 3px; white-space: nowrap; }
 .matrix td.req { min-width: 15rem; }
 .matrix td.sol { min-width: 14rem; color: var(--ink); }
 .matrix td.mod { font-family: var(--mono); font-size: .7rem; color: var(--accent); white-space: nowrap; }
@@ -72,8 +74,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .matrix td.status { white-space: nowrap; }
 .matrix td.proto { min-width: 15rem; font-size: .8rem; }
 .matrix td.proto p { margin: .25rem 0 0; color: var(--muted); }
-.matrix td.ids code:hover, .matrix td.ids code:focus-visible, .needref code:hover, .needref code:focus-visible { background: var(--ink); color: var(--paper); outline: none; cursor: help; }
-.needref { display: block; margin-bottom: .25rem; }
+.matrix code[tabindex]:hover, .matrix code[tabindex]:focus-visible { background: var(--ink); color: var(--paper); outline: none; cursor: help; }
 
 /* requirement behind an ID, while its chip is hovered or focused */
 .tip { position: fixed; z-index: 6; max-width: calc(100vw - 16px); padding: .7rem .85rem; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; box-shadow: 0 6px 24px rgba(0, 0, 0, .18); font-size: .82rem; line-height: 1.45; color: var(--ink); pointer-events: none; }

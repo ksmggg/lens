@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Chips } from "./Chips";
 import { NeedDetail, RequirementDetail } from "./Detail";
 import { SignIn } from "./SignIn";
-import { NeedsTable, RequirementsTable } from "./Table";
+import { Matrix } from "./Matrix";
 import { NoApi, NotSignedIn, SIGN_OUT_URL, fetchIndexViaApi, fetchSession } from "./api";
 import { EMPTY_FILTERS, applyNeedFilters, applyReqFilters, modulesOf, peopleOf, statusesOf, type Filters } from "./filters";
 import { DEFAULT_SOURCE, GitHubError, fetchIndex } from "./github";
@@ -86,8 +86,8 @@ function Workspace({ index, viewer }: { index: DataIndex; viewer: Viewer }) {
     <div className={`app ${openId ? "has-detail" : ""}`}>
       <header className="bar">
         <div className="lens" role="tablist" aria-label="Lens">
-          <button type="button" role="tab" aria-selected={lens === "needs"} onClick={() => switchLens("needs")}>Needs</button>
-          <button type="button" role="tab" aria-selected={lens === "requirements"} onClick={() => switchLens("requirements")}>Requirements</button>
+          <button type="button" role="tab" aria-selected={lens === "needs"} onClick={() => switchLens("needs")}>Needs first</button>
+          <button type="button" role="tab" aria-selected={lens === "requirements"} onClick={() => switchLens("requirements")}>Requirements first</button>
         </div>
         <input type="search" placeholder={lens === "needs" ? "Search needs, people, notes…" : "Search requirements, IDs…"} value={filters.query} onChange={(e) => setFilters({ ...filters, query: e.target.value })} aria-label="Search" />
         <span className="count">{count}</span>
@@ -98,7 +98,7 @@ function Workspace({ index, viewer }: { index: DataIndex; viewer: Viewer }) {
         <Chips label="Person" values={peopleOf(index)} value={filters.person} onPick={(person) => setFilters({ ...filters, person })} />
       </div>
       <div className="tablewrap">
-        {lens === "needs" ? <NeedsTable rows={needs} openId={openId} onOpen={open} sort={sort} onSort={setSort} index={index} /> : <RequirementsTable rows={reqs} openId={openId} onOpen={open} sort={sort} onSort={setSort} index={index} />}
+        <Matrix grain={lens} needs={needs} reqs={reqs} index={index} openId={openId} onOpen={open} sort={sort} onSort={setSort} />
         {(lens === "needs" ? needs : reqs).length === 0 ? <p className="empty">Nothing matches. Clear a filter.</p> : null}
       </div>
       <aside className="pane" aria-live="polite">
