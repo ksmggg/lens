@@ -1,4 +1,5 @@
-import type { DataIndex, Lens, Need, Requirement } from "./model";
+import type { DataIndex, Lens, MatrixStatus, Need, Requirement } from "./model";
+import { MATRIX_STATUS_LABEL } from "./model";
 
 export interface Filters {
   query: string;
@@ -18,10 +19,21 @@ export function peopleOf(index: DataIndex): string[] {
   return unique(names.filter((n) => n && !/^unidentified/i.test(n)));
 }
 
+// The Status column shows the matrix vocabulary in both grains, so the chips do too — in the legend's order.
+const MATRIX_ORDER: MatrixStatus[] = ["confirmed", "future", "discussion", "unwritten", "contested"];
+
 export function statusesOf(index: DataIndex, lens: Lens): string[] {
-  return lens === "needs"
-    ? unique(index.needs.map((n) => n.status))
-    : unique(index.requirements.map((r) => r.status || "unstatused"));
+  const needs = lens === "needs" ? index.needs : index.requirements.flatMap((r) => needsOf(r, index));
+  const present = new Set(needs.map((n) => n.matrix_status).filter(Boolean));
+  return MATRIX_ORDER.filter((s) => present.has(s));
+}
+
+export function statusLabel(status: string): string {
+  return MATRIX_STATUS_LABEL[status as MatrixStatus] ?? status;
+}
+
+function needsOf(r: Requirement, index: DataIndex): Need[] {
+  return r.needs.map((id) => index.needs.find((n) => n.id === id)).filter(Boolean) as Need[];
 }
 
 export function applyNeedFilters(needs: Need[], f: Filters, hits: Set<string> | null): Need[] {
@@ -29,7 +41,7 @@ export function applyNeedFilters(needs: Need[], f: Filters, hits: Set<string> | 
     (n) =>
       (!hits || hits.has(n.id)) &&
       (!f.module || n.module === f.module) &&
-      (!f.status || n.status === f.status) &&
+      (!f.status || n.matrix_status === f.status) &&
       (!f.person || n.raised_by.includes(f.person)),
   );
 }
@@ -39,8 +51,8 @@ export function applyReqFilters(reqs: Requirement[], f: Filters, hits: Set<strin
     (r) =>
       (!hits || hits.has(r.id)) &&
       (!f.module || r.module === f.module) &&
-      (!f.status || (r.status || "unstatused") === f.status) &&
-      (!f.person || r.needs.some((id) => index.needs.find((n) => n.id === id)?.raised_by.includes(f.person!))),
+      (!f.status || needsOf(r, index).some((n) => n.matrix_status === f.status)) &&
+      (!f.person || needsOf(r, index).some((n) => n.raised_by.includes(f.person!))),
   );
 }
 

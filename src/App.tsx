@@ -4,7 +4,7 @@ import { NeedDetail, RequirementDetail } from "./Detail";
 import { SignIn } from "./SignIn";
 import { Matrix } from "./Matrix";
 import { NoApi, NotSignedIn, SIGN_OUT_URL, fetchIndexViaApi, fetchSession } from "./api";
-import { EMPTY_FILTERS, applyNeedFilters, applyReqFilters, modulesOf, peopleOf, statusesOf, type Filters } from "./filters";
+import { EMPTY_FILTERS, applyNeedFilters, applyReqFilters, modulesOf, peopleOf, statusLabel, statusesOf, type Filters } from "./filters";
 import { DEFAULT_SOURCE, GitHubError, fetchIndex } from "./github";
 import { formatAt, type DataIndex, type Lens } from "./model";
 import { buildSearch } from "./search";
@@ -76,7 +76,7 @@ function Workspace({ index, viewer }: { index: DataIndex; viewer: Viewer }) {
   const hits = useMemo(() => search(filters.query, lens), [search, filters.query, lens]);
   const needs = useMemo(() => applyNeedFilters(index.needs, filters, hits), [index, filters, hits]);
   const reqs = useMemo(() => applyReqFilters(index.requirements, filters, hits, index), [index, filters, hits]);
-  const switchLens = (next: Lens) => { setLens(next); setFilters((f) => ({ ...f, status: null })); setOpenId(null); setSort(null); location.hash = next; };
+  const switchLens = (next: Lens) => { setLens(next); setOpenId(null); setSort(null); location.hash = next; };
   const open = (id: string) => { setOpenId(id); if (id.startsWith("N-") !== (lens === "needs")) { setLens(id.startsWith("N-") ? "needs" : "requirements"); } };
   const openNeed = openId ? index.needs.find((n) => n.id === openId) : undefined;
   const openReq = openId ? index.requirements.find((r) => r.id === openId) : undefined;
@@ -94,7 +94,7 @@ function Workspace({ index, viewer }: { index: DataIndex; viewer: Viewer }) {
       </header>
       <div className="filters">
         <Chips label="Module" values={modulesOf(index)} value={filters.module} onPick={(module) => setFilters({ ...filters, module })} />
-        <Chips label="Status" values={statusesOf(index, lens)} value={filters.status} onPick={(status) => setFilters({ ...filters, status })} />
+        <Chips label="Status" values={statusesOf(index, lens)} value={filters.status} onPick={(status) => setFilters({ ...filters, status })} labelOf={statusLabel} />
         <Chips label="Person" values={peopleOf(index)} value={filters.person} onPick={(person) => setFilters({ ...filters, person })} />
       </div>
       <div className="tablewrap">
