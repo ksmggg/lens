@@ -25,7 +25,7 @@ v1 is read-only; v2 commits edits per save through the same proxy, author = Acce
   :8788). Without `GITHUB_TOKEN` the function serves `public/index.json` (copy from lens-data `dist/`).
   `--proxy` is ignored once `pages_build_output_dir` is set, and `--live-reload` 500s in wrangler 4.132 — hence
   the build-watch loop. `npm run dev:token` is plain vite with the old token screen (dev fallback only).
-- Launch config `lens` in `~/STARK/.claude/launch.json` runs both on port 8788.
+- The Claude Code launch config `lens` (outside this repo) runs both on port 8788.
 
 ## Publishing (pending Michi's decision)
 1. Cloudflare Pages project `lens` from `ksmggg/lens` (build `npm run build`, output `dist`); secrets
