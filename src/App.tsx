@@ -2,10 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Chips } from "./Chips";
 import { NeedDetail, RequirementDetail } from "./Detail";
 import { SignIn } from "./SignIn";
+import { NeedsTable, RequirementsTable } from "./Table";
 import { NoApi, NotSignedIn, SIGN_OUT_URL, fetchIndexViaApi, fetchSession } from "./api";
 import { EMPTY_FILTERS, applyNeedFilters, applyReqFilters, modulesOf, peopleOf, statusesOf, type Filters } from "./filters";
 import { DEFAULT_SOURCE, GitHubError, fetchIndex } from "./github";
-import { NEED_STATUS_LABEL, PROTO_LABEL, formatAt, type DataIndex, type Lens } from "./model";
+import { formatAt, type DataIndex, type Lens } from "./model";
 import { buildSearch } from "./search";
 import { clearToken, readToken, writeToken } from "./session";
 
@@ -94,34 +95,14 @@ function Workspace({ index, viewer }: { index: DataIndex; viewer: Viewer }) {
         <Chips label="Status" values={statusesOf(index, lens)} value={filters.status} onPick={(status) => setFilters({ ...filters, status })} />
         <Chips label="Person" values={peopleOf(index)} value={filters.person} onPick={(person) => setFilters({ ...filters, person })} />
       </div>
-      <div className="split">
-        <ul className="list" aria-label={lens}>
-          {lens === "needs"
-            ? needs.map((n) => (
-                <li key={n.id}>
-                  <button type="button" className={`item ${openId === n.id ? "open" : ""}`} onClick={() => open(n.id)}>
-                    <span className="meta">{n.id} · {n.module} · {n.raised_by}{n.sources[0] ? ` · ${formatAt(n.sources[0].at, n.sources[0].approx)}` : ""}</span>
-                    <span className="title">{n.need}</span>
-                    <span className="badges"><span className={`badge s-${n.status}`}>{NEED_STATUS_LABEL[n.status]}</span> <span className={`badge p-${n.prototype.state}`}>{PROTO_LABEL[n.prototype.state]}</span>{n.requirements.length ? <span className="muted"> {n.requirements.join(" ")}</span> : null}</span>
-                  </button>
-                </li>
-              ))
-            : reqs.map((r) => (
-                <li key={r.id}>
-                  <button type="button" className={`item ${openId === r.id ? "open" : ""}`} onClick={() => open(r.id)}>
-                    <span className="meta">{r.id} · {r.module}</span>
-                    <span className="title">{r.ears || <span className="muted">no text imported</span>}</span>
-                    <span className="badges"><span className={`badge r-${(r.status || "unstatused").toLowerCase()}`}>{r.status || "unstatused"}</span> <span className="muted">{r.needs.length} need{r.needs.length === 1 ? "" : "s"}</span></span>
-                  </button>
-                </li>
-              ))}
-          {(lens === "needs" ? needs : reqs).length === 0 ? <li className="empty">Nothing matches. Clear a filter.</li> : null}
-        </ul>
-        <aside className="pane" aria-live="polite">
-          {openNeed ? <NeedDetail need={openNeed} index={index} onOpen={open} /> : openReq ? <RequirementDetail req={openReq} index={index} onOpen={open} /> : <p className="muted placeholder">Pick an item.</p>}
-          {openId ? <button type="button" className="close" onClick={() => setOpenId(null)} aria-label="Close">×</button> : null}
-        </aside>
+      <div className="tablewrap">
+        {lens === "needs" ? <NeedsTable rows={needs} openId={openId} onOpen={open} /> : <RequirementsTable rows={reqs} openId={openId} onOpen={open} index={index} />}
+        {(lens === "needs" ? needs : reqs).length === 0 ? <p className="empty">Nothing matches. Clear a filter.</p> : null}
       </div>
+      <aside className="pane" aria-live="polite">
+        {openNeed ? <NeedDetail need={openNeed} index={index} onOpen={open} /> : openReq ? <RequirementDetail req={openReq} index={index} onOpen={open} /> : null}
+        {openId ? <button type="button" className="close" onClick={() => setOpenId(null)} aria-label="Close">×</button> : null}
+      </aside>
       <footer className="foot">
         <span>Data built {formatAt(index.generatedAt.slice(0, 16))} · {DEFAULT_SOURCE.owner}/{DEFAULT_SOURCE.repo}</span>
         <span>{viewer.email ? `${viewer.email} · ` : ""}<button type="button" className="ghost" onClick={viewer.signOut}>Sign out</button></span>

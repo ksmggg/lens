@@ -1,5 +1,7 @@
 export type NeedStatus = "unwritten" | "proposed" | "covered" | "rejected";
 export type ProtoState = "built" | "partial" | "planned" | "none";
+/** The status vocabulary of the module matrix the team reviews; kept alongside the file-level status. */
+export type MatrixStatus = "confirmed" | "future" | "discussion" | "unwritten" | "contested";
 
 export interface Source {
   meeting: string;
@@ -17,6 +19,7 @@ export interface Need {
   raised_by: string;
   raised_where?: string;
   status: NeedStatus;
+  matrix_status?: MatrixStatus;
   requirements: string[];
   requirement_text?: string;
   requirement_by?: string;
@@ -55,6 +58,14 @@ export const NEED_STATUS_LABEL: Record<NeedStatus, string> = {
   proposed: "draft proposed",
   covered: "covered",
   rejected: "rejected",
+};
+
+export const MATRIX_STATUS_LABEL: Record<MatrixStatus, string> = {
+  confirmed: "confirmed",
+  future: "future",
+  discussion: "up for discussion",
+  unwritten: "unwritten",
+  contested: "contested",
 };
 
 export const PROTO_LABEL: Record<ProtoState, string> = {
