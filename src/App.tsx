@@ -9,6 +9,7 @@ import { DEFAULT_SOURCE, GitHubError, fetchIndex } from "./github";
 import { formatAt, type DataIndex, type Lens } from "./model";
 import { buildSearch } from "./search";
 import { clearToken, readToken, writeToken } from "./session";
+import type { Sort } from "./sort";
 
 /** Who is looking, and how they leave. Access gives an email; the dev token fallback gives none. */
 interface Viewer {
@@ -70,11 +71,12 @@ function Workspace({ index, viewer }: { index: DataIndex; viewer: Viewer }) {
   const [lens, setLens] = useState<Lens>(() => (location.hash === "#requirements" ? "requirements" : "needs"));
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [sort, setSort] = useState<Sort>(null);
   const search = useMemo(() => buildSearch(index), [index]);
   const hits = useMemo(() => search(filters.query, lens), [search, filters.query, lens]);
   const needs = useMemo(() => applyNeedFilters(index.needs, filters, hits), [index, filters, hits]);
   const reqs = useMemo(() => applyReqFilters(index.requirements, filters, hits, index), [index, filters, hits]);
-  const switchLens = (next: Lens) => { setLens(next); setFilters((f) => ({ ...f, status: null })); setOpenId(null); location.hash = next; };
+  const switchLens = (next: Lens) => { setLens(next); setFilters((f) => ({ ...f, status: null })); setOpenId(null); setSort(null); location.hash = next; };
   const open = (id: string) => { setOpenId(id); if (id.startsWith("N-") !== (lens === "needs")) { setLens(id.startsWith("N-") ? "needs" : "requirements"); } };
   const openNeed = openId ? index.needs.find((n) => n.id === openId) : undefined;
   const openReq = openId ? index.requirements.find((r) => r.id === openId) : undefined;
@@ -96,7 +98,7 @@ function Workspace({ index, viewer }: { index: DataIndex; viewer: Viewer }) {
         <Chips label="Person" values={peopleOf(index)} value={filters.person} onPick={(person) => setFilters({ ...filters, person })} />
       </div>
       <div className="tablewrap">
-        {lens === "needs" ? <NeedsTable rows={needs} openId={openId} onOpen={open} /> : <RequirementsTable rows={reqs} openId={openId} onOpen={open} index={index} />}
+        {lens === "needs" ? <NeedsTable rows={needs} openId={openId} onOpen={open} sort={sort} onSort={setSort} /> : <RequirementsTable rows={reqs} openId={openId} onOpen={open} sort={sort} onSort={setSort} index={index} />}
         {(lens === "needs" ? needs : reqs).length === 0 ? <p className="empty">Nothing matches. Clear a filter.</p> : null}
       </div>
       <aside className="pane" aria-live="polite">

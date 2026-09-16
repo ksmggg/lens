@@ -1,24 +1,47 @@
-import type { DataIndex, Need, Requirement } from "./model";
+import type { DataIndex, MatrixStatus, Need, ProtoState, Requirement } from "./model";
 import { MATRIX_STATUS_LABEL, NEED_STATUS_LABEL, PROTO_LABEL } from "./model";
+import { nextSort, sortRows, type Sort } from "./sort";
 
 interface TableProps<T> {
   rows: T[];
   openId: string | null;
   onOpen: (id: string) => void;
+  sort: Sort;
+  onSort: (sort: Sort) => void;
+}
+
+// Status columns sort by meaning, in the order the matrix legend lists them.
+const MATRIX_RANK: Record<MatrixStatus, number> = { confirmed: 0, future: 1, discussion: 2, unwritten: 3, contested: 4 };
+const PROTO_RANK: Record<ProtoState, number> = { built: 0, partial: 1, planned: 2, none: 3 };
+
+const NEED_COLUMNS: [key: string, label: string][] = [
+  ["goal", "User goal"], ["by", "Goal by"], ["ids", "ID"], ["req", "Requirement"], ["reqby", "Requirement by"],
+  ["sol", "Possible solution"], ["mod", "Module"], ["notes", "Notes"], ["status", "Status"], ["proto", "Prototype"],
+];
+
+function needKey(n: Need, key: string): string | number {
+  switch (key) {
+    case "goal": return n.need;
+    case "by": return n.raised_by;
+    case "ids": return n.requirements[0] ?? "";
+    case "req": return n.requirement_text ?? "";
+    case "reqby": return n.requirement_by ?? "";
+    case "sol": return n.solution ?? "";
+    case "mod": return n.module;
+    case "notes": return n.notes ?? "";
+    case "status": return n.matrix_status ? MATRIX_RANK[n.matrix_status] : Number.POSITIVE_INFINITY;
+    case "proto": return PROTO_RANK[n.prototype.state];
+    default: return "";
+  }
 }
 
 /** The module matrix, one need per row — the same columns and order as the matrix everyone has seen. */
-export function NeedsTable({ rows, openId, onOpen }: TableProps<Need>) {
+export function NeedsTable({ rows, openId, onOpen, sort, onSort }: TableProps<Need>) {
   return (
     <table className="matrix">
-      <thead>
-        <tr>
-          <th>User goal</th><th>Goal by</th><th>ID</th><th>Requirement</th><th>Requirement by</th>
-          <th>Possible solution</th><th>Module</th><th>Notes</th><th>Status</th><th>Prototype</th>
-        </tr>
-      </thead>
+      <thead><tr>{NEED_COLUMNS.map(([key, label]) => <Th key={key} col={key} label={label} sort={sort} onSort={onSort} />)}</tr></thead>
       <tbody>
-        {rows.map((n) => (
+        {sortRows(rows, sort, needKey).map((n) => (
           <tr key={n.id} className={openId === n.id ? "open" : ""} onClick={() => onOpen(n.id)} tabIndex={0} onKeyDown={(e) => e.key === "Enter" && onOpen(n.id)}>
             <td className="goal"><span className="nid">{n.id}</span>{n.need}</td>
             <td className="by"><b>{n.raised_by}</b>{n.raised_where}</td>
@@ -41,16 +64,30 @@ export function NeedsTable({ rows, openId, onOpen }: TableProps<Need>) {
   );
 }
 
+const REQ_COLUMNS: [key: string, label: string][] = [
+  ["id", "ID"], ["ears", "Requirement"], ["status", "Status"], ["mod", "Module"], ["needs", "Needs it serves"], ["source", "Source"],
+];
+
+function reqKey(r: Requirement, key: string): string | number {
+  switch (key) {
+    case "id": return r.id;
+    case "ears": return r.ears;
+    case "status": return r.status || "";
+    case "mod": return r.module;
+    case "needs": return r.needs.length ? r.needs.length : Number.POSITIVE_INFINITY;
+    case "source": return r.source ?? "";
+    default: return "";
+  }
+}
+
 /** Requirements first: the written set, with the needs each one serves. */
-export function RequirementsTable({ rows, openId, onOpen, index }: TableProps<Requirement> & { index: DataIndex }) {
+export function RequirementsTable({ rows, openId, onOpen, sort, onSort, index }: TableProps<Requirement> & { index: DataIndex }) {
   const goalOf = (id: string) => index.needs.find((n) => n.id === id);
   return (
     <table className="matrix reqs">
-      <thead>
-        <tr><th>ID</th><th>Requirement</th><th>Status</th><th>Module</th><th>Needs it serves</th><th>Source</th></tr>
-      </thead>
+      <thead><tr>{REQ_COLUMNS.map(([key, label]) => <Th key={key} col={key} label={label} sort={sort} onSort={onSort} />)}</tr></thead>
       <tbody>
-        {rows.map((r) => (
+        {sortRows(rows, sort, reqKey).map((r) => (
           <tr key={r.id} className={openId === r.id ? "open" : ""} onClick={() => onOpen(r.id)} tabIndex={0} onKeyDown={(e) => e.key === "Enter" && onOpen(r.id)}>
             <td className="ids"><code>{r.id}</code>{r.type && r.type !== "Requirement" ? <span className="muted"> {r.type}</span> : null}</td>
             <td className="goal">{r.ears || <span className="muted">no text imported</span>}</td>
@@ -62,5 +99,18 @@ export function RequirementsTable({ rows, openId, onOpen, index }: TableProps<Re
         ))}
       </tbody>
     </table>
+  );
+}
+
+/** A column header that sorts: one click ascending, a second descending, a third back to the file order. */
+function Th({ col, label, sort, onSort }: { col: string; label: string; sort: Sort; onSort: (s: Sort) => void }) {
+  const active = sort?.key === col;
+  const ariaSort = active ? (sort.dir === "asc" ? "ascending" : "descending") : "none";
+  return (
+    <th aria-sort={ariaSort}>
+      <button type="button" className="sorter" onClick={() => onSort(nextSort(sort, col))}>
+        {label}<span className="arrow" aria-hidden="true">{active ? (sort.dir === "asc" ? "↑" : "↓") : ""}</span>
+      </button>
+    </th>
   );
 }

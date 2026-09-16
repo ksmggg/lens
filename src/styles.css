@@ -50,7 +50,10 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .tablewrap { flex: 1; overflow-x: auto; padding-bottom: 5rem; }
 .matrix { border-collapse: collapse; width: 100%; min-width: 92rem; font-size: .84rem; }
 .matrix.reqs { min-width: 64rem; }
-.matrix thead th { position: sticky; top: 0; z-index: 2; background: var(--surface-2); font-family: var(--mono); font-size: .66rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); text-align: left; padding: .6rem .75rem; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+.matrix thead th { position: sticky; top: 0; z-index: 2; background: var(--surface-2); padding: 0; border-bottom: 1px solid var(--rule); text-align: left; white-space: nowrap; }
+.sorter { display: block; width: 100%; text-align: left; border: 0; background: none; padding: .6rem .75rem; font-family: var(--mono); font-size: .66rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); cursor: pointer; }
+.sorter:hover, th[aria-sort=ascending] .sorter, th[aria-sort=descending] .sorter { color: var(--ink); }
+.sorter .arrow { display: inline-block; width: 1em; margin-left: .3em; }
 .matrix tbody td { padding: .65rem .75rem; border-bottom: 1px solid var(--rule); vertical-align: top; color: var(--ink-soft); line-height: 1.4; }
 .matrix tbody tr { cursor: pointer; }
 .matrix tbody tr:hover td { background: var(--surface); }
