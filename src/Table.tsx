@@ -38,12 +38,10 @@ function needKey(n: Need, key: string): string | number {
 
 /** The module matrix, one need per row — the same columns and order as the matrix everyone has seen. */
 export function NeedsTable({ rows, openId, onOpen, sort, onSort, index }: TableProps<Need> & { index: DataIndex }) {
-  const [tip, setTip] = useState<Tip>(null);
-  const show = (id: string) => (e: React.SyntheticEvent<HTMLElement>) => setTip({ id, rect: e.currentTarget.getBoundingClientRect() });
-  const hide = () => setTip(null);
+  const { tip, show, hide } = useChipTip();
   return (
     <>
-    {tip ? <ReqTip id={tip.id} rect={tip.rect} index={index} /> : null}
+    {tip ? <Popover rect={tip.rect}><ReqTip id={tip.id} index={index} /></Popover> : null}
     <table className="matrix">
       <thead><tr>{NEED_COLUMNS.map(([key, label]) => <Th key={key} col={key} label={label} sort={sort} onSort={onSort} />)}</tr></thead>
       <tbody>
@@ -79,19 +77,49 @@ type Tip = { id: string; rect: DOMRect } | null;
 const TIP_WIDTH = 420;
 const TIP_GAP = 6;
 
-/** The requirement behind an ID, shown while a code chip is hovered or focused — what the matrix also did. */
-function ReqTip({ id, rect, index }: { id: string; rect: DOMRect; index: DataIndex }) {
-  const req = index.requirements.find((r) => r.id === id);
+/** Which chip is hovered or focused, and where it sits — one tip at a time per table. */
+function useChipTip() {
+  const [tip, setTip] = useState<Tip>(null);
+  const show = (id: string) => (e: React.SyntheticEvent<HTMLElement>) => setTip({ id, rect: e.currentTarget.getBoundingClientRect() });
+  const hide = () => setTip(null);
+  return { tip, show, hide };
+}
+
+/** Anchored under the chip; flips above it near the bottom of the viewport and stays inside the right edge. */
+function Popover({ rect, children }: { rect: DOMRect; children: React.ReactNode }) {
   const left = Math.max(8, Math.min(rect.left, window.innerWidth - TIP_WIDTH - 8));
   const below = rect.bottom < window.innerHeight * 0.7;
   const style = below ? { left, top: rect.bottom + TIP_GAP } : { left, bottom: window.innerHeight - rect.top + TIP_GAP };
+  return <div className="tip" role="tooltip" style={{ ...style, width: TIP_WIDTH }}>{children}</div>;
+}
+
+/** The requirement behind an ID — what the matrix also showed. */
+function ReqTip({ id, index }: { id: string; index: DataIndex }) {
+  const req = index.requirements.find((r) => r.id === id);
   return (
-    <div className="tip" role="tooltip" style={{ ...style, width: TIP_WIDTH }}>
+    <>
       <p className="tip-head"><b>{id}</b>{req ? <span className={`badge r-${(req.status || "unstatused").toLowerCase()}`}>{req.status || "unstatused"}</span> : null}</p>
       {req ? <p>{req.ears || <span className="muted">no text imported</span>}</p> : <p className="muted">Not in the requirement set — the ID is cited but no file exists for it.</p>}
       {req?.sheet_note ? <p className="muted">{req.sheet_note}</p> : null}
       {req?.source ? <p className="tip-src">{req.source}</p> : null}
-    </div>
+    </>
+  );
+}
+
+/** The need behind an N-### — who wanted it, where they said it, how far the prototype is. */
+function NeedTip({ id, index }: { id: string; index: DataIndex }) {
+  const n = index.needs.find((x) => x.id === id);
+  if (!n) return <p className="tip-head"><b>{id}</b><span className="muted">no need file with this ID</span></p>;
+  return (
+    <>
+      <p className="tip-head">
+        <b>{id}</b>
+        {n.matrix_status ? <span className={`badge m-${n.matrix_status}`}>{MATRIX_STATUS_LABEL[n.matrix_status]}</span> : null}
+        <span className={`badge p-${n.prototype.state}`}>{PROTO_LABEL[n.prototype.state]}</span>
+      </p>
+      <p>{n.need}</p>
+      <p className="tip-src">{n.raised_by}{n.raised_where ? ` · ${n.raised_where}` : ""}</p>
+    </>
   );
 }
 
@@ -114,7 +142,10 @@ function reqKey(r: Requirement, key: string): string | number {
 /** Requirements first: the written set, with the needs each one serves. */
 export function RequirementsTable({ rows, openId, onOpen, sort, onSort, index }: TableProps<Requirement> & { index: DataIndex }) {
   const goalOf = (id: string) => index.needs.find((n) => n.id === id);
+  const { tip, show, hide } = useChipTip();
   return (
+    <>
+    {tip ? <Popover rect={tip.rect}><NeedTip id={tip.id} index={index} /></Popover> : null}
     <table className="matrix reqs">
       <thead><tr>{REQ_COLUMNS.map(([key, label]) => <Th key={key} col={key} label={label} sort={sort} onSort={onSort} />)}</tr></thead>
       <tbody>
@@ -124,12 +155,17 @@ export function RequirementsTable({ rows, openId, onOpen, sort, onSort, index }:
             <td className="goal">{r.ears || <span className="muted">no text imported</span>}</td>
             <td className="status"><span className={`badge r-${(r.status || "unstatused").toLowerCase()}`}>{r.status || "unstatused"}</span></td>
             <td className="mod">{r.module}</td>
-            <td className="notes">{r.needs.length ? r.needs.map((id) => <span key={id} className="needref"><code>{id}</code> {goalOf(id)?.title}</span>) : <span className="muted">none linked</span>}</td>
+            <td className="notes">
+              {r.needs.length
+                ? r.needs.map((id) => <span key={id} className="needref"><code tabIndex={0} onMouseEnter={show(id)} onFocus={show(id)} onMouseLeave={hide} onBlur={hide}>{id}</code> {goalOf(id)?.title}</span>)
+                : <span className="muted">none linked</span>}
+            </td>
             <td className="by">{r.source}</td>
           </tr>
         ))}
       </tbody>
     </table>
+    </>
   );
 }
 
