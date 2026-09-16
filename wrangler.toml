@@ -1,0 +1,9 @@
+name = "lens"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-09-01"
+
+# Non-secret configuration. GITHUB_TOKEN is a Pages secret; DEV_IDENTITY only ever lives in .dev.vars.
+[vars]
+TEAM_DOMAIN = "https://bckstge.cloudflareaccess.com"
+DATA_REPO = "ksmggg/lens-data"
+DATA_BRANCH = "index"

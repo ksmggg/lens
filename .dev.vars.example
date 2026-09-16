@@ -1,0 +1,7 @@
+# Copy to .dev.vars (gitignored). Read by `wrangler pages dev`.
+# Who you are while developing; honoured on localhost only.
+DEV_IDENTITY=you@example.com
+# Optional: read the real index from the data repository instead of public/index.json.
+# GITHUB_TOKEN=github_pat_…
+# Required once an Access application exists (its Application Audience tag).
+# POLICY_AUD=

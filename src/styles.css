@@ -39,6 +39,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .bar input[type=search] { flex: 1 1 12rem; min-width: 0; font: inherit; padding: .5rem .75rem; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); color: var(--ink); }
 .count { font-family: var(--mono); font-size: .75rem; color: var(--muted); white-space: nowrap; }
 .ghost { border: 0; background: none; color: var(--muted); padding: .4rem; }
+.foot .ghost { font: inherit; padding: 0; text-decoration: underline; cursor: pointer; }
 .filters { display: flex; flex-direction: column; gap: .35rem; padding: .5rem .9rem; border-bottom: 1px solid var(--rule); }
 .chips { display: flex; gap: .35rem; overflow-x: auto; scrollbar-width: none; padding-bottom: .1rem; }
 .chips::-webkit-scrollbar { display: none; }
@@ -66,7 +67,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .link { border: 0; background: none; padding: 0; color: var(--accent); font-family: var(--mono); font-size: .85rem; text-decoration: underline; }
 .muted { color: var(--muted); }
 .placeholder { padding: 2rem; }
-.foot { padding: .75rem .9rem; font-family: var(--mono); font-size: .7rem; color: var(--muted); border-top: 1px solid var(--rule); }
+.foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .25rem 1rem; padding: .75rem .9rem; font-family: var(--mono); font-size: .7rem; color: var(--muted); border-top: 1px solid var(--rule); }
 
 .badge { display: inline-block; padding: .1rem .45rem; border-radius: 3px; font-family: var(--mono); font-size: .68rem; letter-spacing: .04em; text-transform: uppercase; border: 1px solid transparent; }
 .s-covered, .p-built, .r-current { background: var(--done-bg); color: var(--done); }

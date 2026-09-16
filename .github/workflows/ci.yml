@@ -1,0 +1,16 @@
+name: ci
+on:
+  push:
+  pull_request:
+permissions: { contents: read }
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run ci
+      # The shell must stay product-neutral (same rule as kosmos-ui).
+      - run: '! grep -rIiE "stark|minerva|coda" --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=.git --exclude-dir=.github .'

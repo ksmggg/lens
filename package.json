@@ -4,24 +4,28 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "preview": "vite preview",
+    "dev": "vite build --watch --mode development",
+    "dev:pages": "wrangler pages dev --port 8788",
+    "dev:token": "vite --port 5199 --strictPort",
+    "build": "tsc --noEmit && tsc -p functions --noEmit && vite build",
     "test": "vitest run",
     "ci": "npm run build && npm test"
   },
   "dependencies": {
+    "jose": "^6.2.12",
     "minisearch": "^7.1.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "yaml": "^2.6.1"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260916.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",
     "typescript": "^5.7.2",
     "vite": "^6.0.0",
-    "vitest": "^3.0.0"
+    "vitest": "^3.0.0",
+    "wrangler": "^4.132.0"
   }
 }

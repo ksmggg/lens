@@ -15,13 +15,8 @@ export class GitHubError extends Error {
   }
 }
 
-/** One request: the prebuilt index from the private repo, readable only with a token that can see it. */
+/** Dev fallback only: the prebuilt index from the private repo, read directly with the viewer's own token. */
 export async function fetchIndex(source: DataSource, token: string): Promise<DataIndex> {
-  // Local development against a copy of the data: `public/index.json` (never committed).
-  if (import.meta.env.DEV && import.meta.env["VITE_LOCAL_INDEX"] === "1") {
-    const local = await fetch(`${import.meta.env.BASE_URL}index.json`);
-    if (local.ok) return (await local.json()) as DataIndex;
-  }
   const url = `https://api.github.com/repos/${source.owner}/${source.repo}/contents/index.json?ref=${source.branch}`;
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github.raw+json" },

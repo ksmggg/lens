@@ -6,7 +6,7 @@ export function SignIn({ error, onSubmit }: { error: string | null; onSubmit: (t
   return (
     <main className="signin">
       <h1>lens</h1>
-      <p className="lede">Two views over one folder of needs and requirements. The data stays in its private repository; this page only reads it with your token.</p>
+      <p className="lede">Development fallback — the published site signs you in with your email. Here the data is read straight from its private repository with a token of yours.</p>
       <form
         onSubmit={(e) => {
           e.preventDefault();
